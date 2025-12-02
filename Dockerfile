@@ -1,9 +1,11 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-COPY . .
+COPY pom.xml .
+RUN mvn -q -e -DskipTests dependency:go-offline
 
-RUN ./mvnw -q -e -DskipTests clean package
+COPY . .
+RUN mvn -q -e -DskipTests clean package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
@@ -11,5 +13,4 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
-
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
